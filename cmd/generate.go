@@ -18,7 +18,6 @@ package cmd
 import (
 	"bytes"
 	"embed"
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -78,13 +77,13 @@ func generate_controller(name string, path string) {
 	controller_formatted_name := fmt.Sprintf("%vController", controller_base_name)
 	controller_full_path := fmt.Sprintf("%v/%v", controller_directory_path, path)
 
-	if _, err := os.Stat(controller_full_path); errors.Is(err, os.ErrExist) {
-		log.Fatal(err)
+	if _, err := os.Stat(controller_full_path); !os.IsNotExist(err) {
+		log.Fatalf("directory %v already exists!", controller_full_path)
 	}
 
-	err := os.Mkdir(controller_full_path, os.ModePerm)
+	err := os.MkdirAll(controller_full_path, os.ModePerm)
 	if err != nil {
-		log.Fatalf("directory %v already exists! Error = %q", controller_full_path, err)
+		log.Fatalf("directory %v could not be created! Error = %q", controller_full_path, err)
 	}
 
 	createAndWriteImplementationFile(controller_full_path, controller_formatted_name, path)
